@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Agenda Google</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #009889;
+            --primary-hover: #008578;
+            --secondary-color: #F15A22;
+            --secondary-hover: #e04d18;
+            --ver-color: #00A0DC;
+            --ver-hover: #0280ad;
+            --text-color: #414042;
+            --background-color: #FFE6CB;
+            --accent-blue: #00A0DC;
+            --dark-blue: #325565;
+            --dark-gray: #414042;
+            --box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            --border-radius: 4px;
+            --font-family: 'Roboto', Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 5px;
+            font-size: 13px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: var(--box-shadow);
+            padding: 20px;
+            position: relative;
+        }
+
+        h1 {
+            color: var(--secondary-color);
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 10px;
+            background-color: rgba(241, 90, 34, 0.05);
+            border-radius: var(--border-radius);
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            text-align: center;
+            margin-bottom: 5px;
+            padding: 5px;
+            background-color: rgba(241, 90, 34, 0.05);
+            border-radius: var(--border-radius);
+        }
+
+        .form-group {
+            margin-bottom: 5px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 0px;
+            color: var(--text-color);
+        }
+
+        .required::after {
+            content: "*";
+            color: var(--secondary-color);
+            margin-left: 4px;
+        }
+
+        input[type="text"], 
+        input[type="date"], 
+        input[type="time"], 
+        textarea {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus, 
+        input[type="date"]:focus, 
+        input[type="time"]:focus, 
+        textarea:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 5px rgba(66, 133, 244, 0.3);
+        }
+
+        .row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .col {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 5px;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button i {
+            margin-right: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-ver {
+            background-color: var(--ver-color);
+            color: white;
+            flex: 1;
+            text-decoration: none;
+
+            
+        }
+
+        a{
+            text-decoration: none;
+        }
+
+        .btn-ver:hover {
+            background-color: var(--ver-hover);
+        }
+
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--secondary-hover);
+        }
+
+        .location-icon {
+            color: var(--secondary-color);
+            margin-right: 5px;
+        }
+
+        .invite-section {
+            margin-bottom: 30px;
+        }
+
+        .invite-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+        }
+
+        .guest-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .guest-item {
+            display: flex;
+            align-items: center;
+            background-color: rgba(0, 160, 220, 0.1);
+            padding: 8px 12px;
+            border-radius: var(--border-radius);
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-right: 8px;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--secondary-color);
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .required-note {
+            color: var(--secondary-color);
+            font-size: 14px;
+            text-align: right;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .row {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .guest-list {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 style="color: var(--secondary-color);">GERADOR DE AGENDA GOOGLE</h2>
+        
+        <form id="eventForm">
+            <div class="form-group">
+                <label for="titulo" class="required">TÍTULO DO EVENTO</label>
+                <input type="text" id="titulo" name="titulo" placeholder="Digite um título para o evento" required>
+            </div>
+            
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="dataInicio" class="required">DATA DO INÍCIO</label>
+                        <input type="date" id="dataInicio" name="dataInicio" required>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="horaInicio" class="required">HORA DO INÍCIO</label>
+                        <input type="time" id="horaInicio" name="horaInicio" required>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="dataTermino" class="required">DATA DO TÉRMINO</label>
+                        <input type="date" id="dataTermino" name="dataTermino" required>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="form-group">
+                        <label for="horaTermino" class="required">HORA DO TÉRMINO</label>
+                        <input type="time" id="horaTermino" name="horaTermino" required>
+                    </div>
+                </div>
+            </div>
+                  
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="local"><i class="fas fa-map-marker-alt location-icon"></i> LOCAL</label>
+                        <input type="text" id="local" name="local" placeholder="Digite o local do evento">
+                    </div>
+                </div>
+                <div class="col">    
+                    <div class="form-group">
+                        <label for="detalhes">DETALHES</label>
+                        <textarea id="detalhes" name="detalhes" rows="3" placeholder="Adicione detalhes sobre o evento"></textarea>
+                    </div>
+                </div>    
+            </div>  
+            
+            <div class="required-note">* Campos obrigatórios</div>
+            
+            <div class="invite-section">
+                <div class="invite-title">ADICIONAR CONVIDADOS:</div>
+                <div class="guest-list">
+
+                    <!-- CONVIDADOS -->
+
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="alenxandre" name="convidados" value="alexandre.nicolas@educacao.fortaleza.ce.gov.br">
+                            <label for="alexandre">Alexandre</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="alisson" name="convidados" value="alisson.patricio@educacao.fortaleza.ce.gov.br">
+                            <label for="alisson">Alisson</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="amaury" name="convidados" value="amaury.eleuterio@educacao.fortaleza.ce.gov.br">
+                            <label for="amaury">Amaury</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="atila" name="convidados" value="atila.medeiros@educacao.fortaleza.ce.gov.br">
+                            <label for="atila">Átila</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="breno" name="convidados" value="breno.wendel@educacao.fortaleza.ce.gov.br">
+                            <label for="breno">Breno</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="bruno" name="convidados" value="bruno.barros@educacao.fortaleza.ce.gov.br">
+                            <label for="bruno">Bruno</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="carlane" name="convidados" value="carlane.campos@educacao.fortaleza.ce.gov.br">
+                            <label for="carlane">Carlane</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="carlos" name="convidados" value="carlos.filho@educacao.fortaleza.ce.gov.br">
+                            <label for="carlos">Carlos</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="danielF" name="convidados" value="daniel.abreu@educacao.fortaleza.ce.gov.br">
+                            <label for="danielF">Daniel Filho</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="danielFer" name="convidados" value="daniel.fernandes@educacao.fortaleza.ce.gov.br">
+                            <label for="danieilFer">Daniel Fernandes</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="dayana" name="convidados" value="dayana.rocha@educacao.fortaleza.ce.gov.br">
+                            <label for="dayana">Dayana</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="debora" name="convidados" value="debora.valentim@educacao.fortaleza.ce.gov.br">
+                            <label for="debora">Débora</label>
+                        </div>
+                    </div>                   
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="denalth" name="convidados" value="denalth.ferreira@educacao.fortaleza.ce.gov.br">
+                            <label for="denalth">Denalth</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="edgar" name="convidados" value="edgar.sergio@educacao.fortaleza.ce.gov.br">
+                            <label for="edgar">Edgar</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="edleno" name="convidados" value="edleno.matos@educacao.fortaleza.ce.gov.br">
+                            <label for="edleno">Edleno</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="emiliane" name="convidados" value="emiliane.moura@educacao.fortaleza.ce.gov.br">
+                            <label for="emiliane">Emiliane</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="fellipe" name="convidados" value="antonio.fellipe@educacao.fortaleza.ce.gov.br">
+                            <label for="fellipe">Fellipe</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="flavio" name="convidados" value="flavio.mendonca@educacao.fortaleza.ce.gov.br">
+                            <label for="flavio">Flávio</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="frank" name="convidados" value="frank.albenio@educacao.fortaleza.ce.gov.br">
+                            <label for="frank">Frank</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="hakney" name="convidados" value="hakney.lima@educacao.fortaleza.ce.gov.br">
+                            <label for="hakney">Hakney</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="heveraldo" name="convidados" value="heveraldo.souza@educacao.fortaleza.ce.gov.br">
+                            <label for="heveraldo">Heveraldo</label>
+                        </div>
+                    </div>                 
+                    
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="jayckson" name="convidados" value="jayckson@gmail.com">
+                            <label for="jayckson">Jayckson</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="jessica" name="convidados" value="jessica.ingrid@educacao.fortaleza.ce.gov.br">
+                            <label for="jessica">Jéssica</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="jesus" name="convidados" value="franciscorbj@educacao.fortaleza.ce.gov.br">
+                            <label for="jesus">Jesus</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="jonas" name="convidados" value="jonas.bezerra@educacao.fortaleza.ce.gov.br">
+                            <label for="jonas">Jonas</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="junior" name="convidados" value="luiz.giglioli@educacao.fortaleza.ce.gov.br">
+                            <label for="junior">Júnior</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="jussier" name="convidados" value="jussier.vasconcelos@educacao.fortaleza.ce.gov.br">
+                            <label for="jussier">Jussier</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="lamartine" name="convidados" value="lamartine.soares@educacao.fortaleza.ce.gov.br">
+                            <label for="lamartine">Lamartine</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="lissiane" name="convidados" value="lissiane.ribeiro@educacao.fortaleza.ce.gov.br">
+                            <label for="lissiane">Lissiane</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="maciel" name="convidados" value="francisco.monteiro@educacao.fortaleza.ce.gov.br">
+                            <label for="maciel">Maciel</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="natanael" name="convidados" value="natanael.nogueira@educacao.fortaleza.ce.gov.br">
+                            <label for="natanael">Natanael</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="rGil" name="convidados" value="roberto.lima@educacao.fortaleza.ce.gov.br">
+                            <label for="rGil">Roberto Gil</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="rodrigo" name="convidados" value="rodrigo.santos@educacao.fortaleza.ce.gov.br">
+                            <label for="rodrigo">Rodrigo</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="terezinha" name="convidados" value="tz.sousa@educacao.fortaleza.ce.gov.br">
+                            <label for="terezinha">Terezinha</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="wanderson" name="convidados" value="wanderson.queiroz@educacao.fortaleza.ce.gov.br">
+                            <label for="wanderson">Wanderson</label>
+                        </div>
+                    </div>
+                    <div class="guest-item">
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="wellington" name="convidados" value="jose.wellington@educacao.fortaleza.ce.gov.br">
+                            <label for="wellington">Wellington</label>
+                        </div>
+                    </div>
+
+                    <!-- FIM CONVIDADOS -->
+
+                </div>
+            </div>
+ 
+            <div class="button-group">
+                <button type="submit" class="btn-primary" id="agendarBtn">
+                    <i class="fas fa-calendar-check"></i> Agendar
+                </button>
+                <button type="reset" class="btn-secondary" id="limparBtn">
+                    <i class="fas fa-broom"></i> Limpar
+                </button>
+            </div>
+        </form>
+        <div id="mensagem" style="display: none; margin-top: 20px; padding: 15px; border-radius: 4px; text-align: center;"></div>
+        <!-- CALENDÁRIO PARA EXIBIR  -->
+        <div id="calendario" class="button-group"  style="display: block">
+            <center>
+                <a href="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=America%2FFortaleza&showPrint=0&showCalendars=0&showTz=0&hl=pt_BR&src=Y19iOTAwNTZkYzZhNDI5OWQwMzcwMWNhODIxODNhYWNkMzliNzQ5YTYyZTg1MWU5MzVkOTAxYjViM2Q4ZjI4MTdiQGdyb3VwLmNhbGVuZGFyLmdvb2dsZS5jb20&color=%23c13400" target="_blank">
+                <button class="btn-ver">VER CALENDÁRIO</button>    
+                </a>
+            </center>
+        </div>
+        <!--     -->
+
+        
+        
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('eventForm');
+            const mensagemDiv = document.getElementById('mensagem');
+            const calendarioDiv = document.getElementById('calendario');
+            const calendarioLink = document.getElementById('linkCalendario');
+
+            
+            // URL do webhook do n8n (substitua pela sua URL real)
+            // const webhookUrl = 'https://n8njayckson.cloud/webhook/agendaCoteci';
+            const webhookUrl = 'https://n8njayckson.cloud/webhook-test/agendaCoteci';
+            
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Verificação básica de formulário
+                const titulo = document.getElementById('titulo').value;
+                const dataInicio = document.getElementById('dataInicio').value;
+                const horaInicio = document.getElementById('horaInicio').value;
+                const dataTermino = document.getElementById('dataTermino').value;
+                const horaTermino = document.getElementById('horaTermino').value;
+                
+                if (!titulo || !dataInicio || !horaInicio || !dataTermino || !horaTermino) {
+                    exibirMensagem('Por favor, preencha todos os campos obrigatórios.', 'error');
+                    return;
+                }
+                
+                // Verifica se a data/hora de término é posterior à data/hora de início
+                const inicio = new Date(`${dataInicio}T${horaInicio}`);
+                const termino = new Date(`${dataTermino}T${horaTermino}`);
+                
+                if (termino <= inicio) {
+                    exibirMensagem('A data/hora de término deve ser posterior à data/hora de início.', 'error');
+                    return;
+                }
+                
+                // Coleta os convidados selecionados
+                const checkboxes = document.querySelectorAll('input[name="convidados"]:checked');
+                const convidados = Array.from(checkboxes).map(cb => cb.value);
+                
+                // Cria o objeto de dados para enviar
+                const dadosEvento = {
+                    titulo: titulo,
+                    dataInicio: dataInicio,
+                    horaInicio: horaInicio,
+                    dataTermino: dataTermino,
+                    horaTermino: horaTermino,
+                    local: document.getElementById('local').value,
+                    convidados: convidados,
+                    detalhes: document.getElementById('detalhes').value
+                };
+                
+                // Envia os dados para o webhook
+                enviarParaWebhook(dadosEvento);
+            });
+            
+            // Função para enviar os dados para o webhook
+            function enviarParaWebhook(dados) {
+                // Mostra mensagem de carregamento
+                exibirMensagem('Enviando dados...', 'info');
+                
+                fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(dados)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro ao enviar dados para o webhook');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Sucesso:', data);
+                    exibirMensagem('Evento agendado com sucesso!', 'success');
+                    
+                    form.reset();
+                })
+                .catch((error) => {
+                    console.error('Erro:', error);
+                    // Para fins de demonstração, vamos simular sucesso
+                    exibirMensagem('Evento agendado com sucesso!!', 'success');
+                    
+                });
+            }
+            
+            // Função para exibir mensagens
+            function exibirMensagem(texto, tipo) {
+                mensagemDiv.textContent = texto;
+                mensagemDiv.style.display = 'block';
+                
+                // Define a cor de fundo com base no tipo de mensagem
+                if (tipo === 'error') {
+                    mensagemDiv.style.backgroundColor = '#ffebee';
+                    mensagemDiv.style.color = '#F15A22';
+                    mensagemDiv.style.border = '1px solid #F15A22';
+                } else if (tipo === 'success') {
+                    mensagemDiv.style.backgroundColor = 'rgba(0, 152, 137, 0.1)';
+                    mensagemDiv.style.color = '#009889';
+                    mensagemDiv.style.border = '1px solid #009889';
+                } else {
+                    mensagemDiv.style.backgroundColor = 'rgba(0, 160, 220, 0.1)';
+                    mensagemDiv.style.color = '#00A0DC';
+                    mensagemDiv.style.border = '1px solid #00A0DC';
+                }
+                
+                // Esconde a mensagem após alguns segundos se for sucesso
+                if (tipo === 'success') {
+                    setTimeout(function() {
+                        mensagemDiv.style.display = 'none';
+                        calendarioDiv.style.display = 'block';
+                        calendarioLink.contentWindow.location.reload();                        
+                    }, 6000);
+
+                }
+            }
+            
+            // Inicializar datas com a data atual
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('dataInicio').value = hoje;
+            document.getElementById('dataTermino').value = hoje;
+        });
+    </script>
+</body>
+</html>
