@@ -1,0 +1,1421 @@
+{
+  "name": "Calendário COTECI",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agendaCoteci",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1560,
+        80
+      ],
+      "id": "d855862c-a25f-4fdb-bd25-d608ef97ec51",
+      "name": "Webhook",
+      "webhookId": "8011738a-de8e-4d85-9efa-1f52f483f65d",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d07a97c7-ffcd-492b-9e28-c7ff56044d15",
+              "name": "titulo",
+              "value": "={{ $json.body.titulo\n}}",
+              "type": "string"
+            },
+            {
+              "id": "bc1e201e-cb26-411d-9b36-057ce90b28ed",
+              "name": "inicio",
+              "value": "={{ \n$json.body.dataInicio+\"T\"+$json.body.horaInicio+\":00-03:00\"\n}}",
+              "type": "string"
+            },
+            {
+              "id": "9eb29923-d556-41f8-a5cb-ac2c02d7f1eb",
+              "name": "termino",
+              "value": "={{ \n\n$json.body.dataTermino+\"T\"+$json.body.horaTermino+\":00-03:00\"\n\n}}",
+              "type": "string"
+            },
+            {
+              "id": "c10dfb21-81a5-4629-9220-68a07998b27d",
+              "name": "convidados",
+              "value": "={{ $json.body.convidados.join(\",\") }}",
+              "type": "string"
+            },
+            {
+              "id": "04d27762-acc5-49a4-806d-6226125c108b",
+              "name": "detalhes",
+              "value": "={{ $json.body.detalhes }}",
+              "type": "string"
+            },
+            {
+              "id": "cb2cc687-af90-497b-aeb1-cdd5185fa334",
+              "name": "local",
+              "value": "={{ $json.body.local }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1340,
+        80
+      ],
+      "id": "4a24e05b-c903-40a1-88e1-269e6198ba24",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=<a href='http://educacao.fortaleza.ce.gov.br'>SME</a>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.2,
+      "position": [
+        -1120,
+        80
+      ],
+      "id": "38a364fe-8f6d-4538-9b95-d7fd9add5be6",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "c_b90056dc6a4299d03701ca82183aacd39b749a62e851e935d901b5b3d8f2817b@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "COTECI"
+        },
+        "start": "={{ $('Edit Fields').item.json.inicio }}",
+        "end": "={{ $('Edit Fields').item.json.termino }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $json.convidados }}"
+          ],
+          "description": "={{ $('Edit Fields').item.json.detalhes }}",
+          "location": "={{ $('Edit Fields').item.json.local }}",
+          "summary": "={{ $('Edit Fields').item.json.titulo }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        -900,
+        -20
+      ],
+      "id": "bc7a25f4-b880-4b83-9c58-f0fce64662c5",
+      "name": "Agenda COTECI",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "6f4w0aISUvW5eqnF",
+          "name": "Google Calendar - Educacao"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "c_3c08d3ac427eaf90604d81cf025a95d07d38cf1926e8ec1d2af4e839e99e400b@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Agendamentos de Entrevistas COTECI"
+        },
+        "start": "={{ $('Edit Fields').item.json.inicio }}",
+        "end": "={{ $('Edit Fields').item.json.termino }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $json.convidados }}"
+          ],
+          "description": "={{ $('Edit Fields').item.json.detalhes }}",
+          "location": "={{ $('Edit Fields').item.json.local }}",
+          "summary": "={{ $('Edit Fields').item.json.titulo }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        -900,
+        180
+      ],
+      "id": "529e3e71-fe10-4946-a7e9-540d4fe070c5",
+      "name": "Agenda Entrevistas",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "6f4w0aISUvW5eqnF",
+          "name": "Google Calendar - Educacao"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "JayAgenda",
+        "remoteJid": "558588339667@s.whatsapp.net",
+        "messageText": "=📒 *AGENDA COTECI*\n\n🔸{{ $('Webhook').item.json.body.titulo }}\n\n*📆Data:* {{ $('Webhook').item.json.body.dataInicio.split('-')[2]+'/'+$('Webhook').item.json.body.dataInicio.split('-')[1]+'/'+$('Webhook').item.json.body.dataInicio.split('-')[0] }}\n*⌚Hora:* {{ $('Webhook').item.json.body.horaInicio }}\n\n{{ $('Webhook').item.json.body.detalhes }}\n\n",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -680,
+        -20
+      ],
+      "id": "8d5b1657-a796-4cd7-aad3-bb909f0256d4",
+      "name": "Enviar Jayckson",
+      "credentials": {
+        "evolutionApi": {
+          "id": "As6WaSWeGyu8Ew8X",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "JayAgenda",
+        "remoteJid": "558597593445@s.whatsapp.net",
+        "messageText": "=📒 *AGENDA COTECI*\n\n🔸{{ $('Webhook').item.json.body.titulo }}\n\n*📆Data:* {{ $('Webhook').item.json.body.dataInicio.split('-')[2]+'/'+$('Webhook').item.json.body.dataInicio.split('-')[1]+'/'+$('Webhook').item.json.body.dataInicio.split('-')[0] }}\n*⌚Hora:* {{ $('Webhook').item.json.body.horaInicio }}\n\n{{ $('Webhook').item.json.body.detalhes }}\n\n",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        -20
+      ],
+      "id": "7b3f15e1-b33a-4b2d-80d6-011a9019bc55",
+      "name": "Enviar Bruno",
+      "credentials": {
+        "evolutionApi": {
+          "id": "As6WaSWeGyu8Ew8X",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "JayAgenda",
+        "remoteJid": "558586275965@s.whatsapp.net",
+        "messageText": "=📒 *AGENDA COTECI*\n\n🔸{{ $('Webhook').item.json.body.titulo }}\n\n*📆Data:* {{ $('Webhook').item.json.body.dataInicio.split('-')[2]+'/'+$('Webhook').item.json.body.dataInicio.split('-')[1]+'/'+$('Webhook').item.json.body.dataInicio.split('-')[0] }}\n*⌚Hora:* {{ $('Webhook').item.json.body.horaInicio }}\n\n{{ $('Webhook').item.json.body.detalhes }}\n\n",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        200,
+        -20
+      ],
+      "id": "ceb6a041-2ad4-48a1-a542-2b38d08dded9",
+      "name": "Enviar Lissiane",
+      "credentials": {
+        "evolutionApi": {
+          "id": "As6WaSWeGyu8Ew8X",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -460,
+        -20
+      ],
+      "id": "6dcf24ab-a039-4e12-8596-ddc540d7eb1c",
+      "name": "Pause",
+      "webhookId": "5bc42e06-d3ba-4421-a45d-aeb5ba775c83"
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -20,
+        -20
+      ],
+      "id": "e0b95baa-4a11-481f-a518-11fd019589c5",
+      "name": "Pause1",
+      "webhookId": "5bc42e06-d3ba-4421-a45d-aeb5ba775c83"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "Texto",
+        "include": "selectedOtherFields",
+        "fieldsToInclude": "Texto",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        240
+      ],
+      "id": "b2e1dd76-2332-44e8-814c-58b308d40db7",
+      "name": "Split Out",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.id }}",
+                    "rightValue": 0,
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "5c73d346-af72-4a85-a96a-dc8bb54e8f75"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "temRegistro"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "40f7adf5-e7b4-4b49-9cee-3abf02659ca7",
+                    "leftValue": "={{ $json.id }}",
+                    "rightValue": 0,
+                    "operator": {
+                      "type": "string",
+                      "operation": "notExists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "semRegistro"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        160,
+        580
+      ],
+      "id": "f30ac05a-d8dc-42dc-8932-06d0084d5cf9",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        680,
+        800
+      ],
+      "id": "b6f4755e-afab-4c0e-af76-2a15032ed85c",
+      "name": "Pause2",
+      "webhookId": "5bc42e06-d3ba-4421-a45d-aeb5ba775c83"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "JayAgenda",
+        "remoteJid": "558588339667@s.whatsapp.net",
+        "messageText": "=🔸Sem compromisso para os próximos 7 dias",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        900,
+        800
+      ],
+      "id": "7da81f3f-5775-42bc-8f66-52095341fbff",
+      "name": "Sem Agenda Jayckson",
+      "executeOnce": true,
+      "credentials": {
+        "evolutionApi": {
+          "id": "As6WaSWeGyu8Ew8X",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        800
+      ],
+      "id": "7a050c96-d056-4b31-9e84-757ca975143a",
+      "name": "Pause3",
+      "webhookId": "5bc42e06-d3ba-4421-a45d-aeb5ba775c83"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "JayAgenda",
+        "remoteJid": "558586275965@s.whatsapp.net",
+        "messageText": "=🔸Sem compromisso para os próximos 7 dias.",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1340,
+        800
+      ],
+      "id": "abacc5e9-8e1f-4fea-bd13-391ea067f619",
+      "name": "Sem Agenda Lissiane",
+      "executeOnce": true,
+      "credentials": {
+        "evolutionApi": {
+          "id": "As6WaSWeGyu8Ew8X",
+          "name": "Evolution account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1,
+                2,
+                3,
+                4,
+                5
+              ],
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1600,
+        660
+      ],
+      "id": "e2b14c53-9f9f-48ff-8cbc-14e59f262b6c",
+      "name": "Gatilho 8h"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "c_b90056dc6a4299d03701ca82183aacd39b749a62e851e935d901b5b3d8f2817b@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "COTECI"
+        },
+        "timeMax": "={{ $now.plus({ day: 7 }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        -60,
+        580
+      ],
+      "id": "7b615276-244e-4a78-b07a-b275082b8240",
+      "name": "Agenda COTECI Listar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "6f4w0aISUvW5eqnF",
+          "name": "Google Calendar - Educacao"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $('Sort').item.json.start.dateTime }}",
+        "format": "custom",
+        "customFormat": "dd/MM/yyyy",
+        "outputFieldName": "dataAgenda",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        460,
+        240
+      ],
+      "id": "764b0380-e76d-4f1f-9791-abcc0fc60f5c",
+      "name": "Data Início"
+    },
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $('Sort').item.json.start.dateTime }}",
+        "format": "custom",
+        "customFormat": "HH:mm",
+        "outputFieldName": "horaAgenda",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        600,
+        240
+      ],
+      "id": "b8d23e5f-35e4-410b-ba3c-e47b12255664",
+      "name": "Hora Início"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d14cbfef-b259-46f1-b21b-6c9dee15333e",
+              "name": "Texto",
+              "value": "=🔶 {{ $('Sort').item.json.summary }}\n\n🗓️ Data: {{ $('Data Início').item.json.dataAgenda }}\n⌚ Hora: {{ $('Hora Início').item.json.horaAgenda }}\n\n{{ $('Sort').item.json.description }}\n🎦 {{ $('Sort').item.json.conferenceData.entryPoints[0].label }}\n🔗 {{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        920,
+        240
+      ],
+      "id": "2430ad25-13b2-44a1-9646-2cdb722378d3",
+      "name": "Campos"
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -940,
+        580
+      ],
+      "id": "38c7077c-3fcd-4739-82dc-5643dccc4a43",
+      "name": "Pause4",
+      "webhookId": "5bc42e06-d3ba-4421-a45d-aeb5ba775c83"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "JayAgenda",
+        "remoteJid": "558597593445@s.whatsapp.net",
+        "messageText": "=🤖 *AGENDA COTECI*\n🗓️ {{ $json.hoje }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -1160,
+        580
+      ],
+      "id": "14e52ac0-ee42-4fe3-9574-12c4f17826d5",
+      "name": "Abertura Agenda Bruno",
+      "executeOnce": false,
+      "credentials": {
+        "evolutionApi": {
+          "id": "As6WaSWeGyu8Ew8X",
+          "name": "Evolution account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -500,
+        580
+      ],
+      "id": "b3f8cc8d-61ab-4521-be3b-30f5bded7f8f",
+      "name": "Pause5",
+      "webhookId": "5bc42e06-d3ba-4421-a45d-aeb5ba775c83"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "JayAgenda",
+        "remoteJid": "558586275965@s.whatsapp.net",
+        "messageText": "=🤖 *AGENDA COTECI*\n🗓️ {{ $json.hoje }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -280,
+        580
+      ],
+      "id": "81f7ee97-7aff-41c4-a345-51910f2d4659",
+      "name": "Abertura Agenda Lissiane",
+      "executeOnce": false,
+      "credentials": {
+        "evolutionApi": {
+          "id": "As6WaSWeGyu8Ew8X",
+          "name": "Evolution account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "JayAgenda",
+        "remoteJid": "558597593445@s.whatsapp.net",
+        "messageText": "=🔸Sem compromisso para os próximos 7 dias.",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        440,
+        760
+      ],
+      "id": "725d6256-488b-4e93-80bf-bbed1fd9a0ae",
+      "name": "Sem Agenda Bruno",
+      "executeOnce": true,
+      "credentials": {
+        "evolutionApi": {
+          "id": "As6WaSWeGyu8Ew8X",
+          "name": "Evolution account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "JayAgenda",
+        "remoteJid": "558588339667@s.whatsapp.net",
+        "messageText": "={{ $('Split Out').item.json.Texto }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        2100,
+        460
+      ],
+      "id": "c248f5a8-439d-4b49-ab81-801c252d79ca",
+      "name": "Evento Jayckson",
+      "credentials": {
+        "evolutionApi": {
+          "id": "As6WaSWeGyu8Ew8X",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "JayAgenda",
+        "remoteJid": "558588339667@s.whatsapp.net",
+        "messageText": "=🤖 *AGENDA COTECI*\n🗓️ {{ $json.hoje }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        -700,
+        580
+      ],
+      "id": "438adde2-e8c5-4e06-9e9d-119d215faf3e",
+      "name": "Abertura Agenda Jayckson",
+      "executeOnce": false,
+      "credentials": {
+        "evolutionApi": {
+          "id": "As6WaSWeGyu8Ew8X",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1600,
+        455
+      ],
+      "id": "f7e1250c-1175-49ae-8172-06066ecf16de",
+      "name": "When clicking ‘Test workflow’",
+      "notesInFlow": true,
+      "notes": "Testando"
+    },
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $now }}",
+        "format": "custom",
+        "customFormat": "dd/MM/yyyy",
+        "outputFieldName": "hoje",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        -1380,
+        580
+      ],
+      "id": "877aba0b-9749-45f6-9e29-68071f898969",
+      "name": "Dia de hoje"
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1880,
+        460
+      ],
+      "id": "32e4f81e-cb63-40fc-82fe-d5f8707350ca",
+      "name": "Wait",
+      "webhookId": "0a6f4e97-313e-48ca-8ece-19e6418bf573"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "JayAgenda",
+        "remoteJid": "558597593445@s.whatsapp.net",
+        "messageText": "={{ $('Split Out').item.json.Texto }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        460
+      ],
+      "id": "0effe4e3-0abd-4ea6-b4b7-1e964f0d0341",
+      "name": "Evento Bruno",
+      "credentials": {
+        "evolutionApi": {
+          "id": "As6WaSWeGyu8Ew8X",
+          "name": "Evolution account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2320,
+        460
+      ],
+      "id": "9e6f5472-cdb9-40ed-b9f5-497903e5e4ef",
+      "name": "Wait1",
+      "webhookId": "af5434ed-d035-4680-b9e2-6d5b008633ab"
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2760,
+        460
+      ],
+      "id": "fd8d2308-8d1b-4f6e-bffb-ba8a52115cbd",
+      "name": "Wait2",
+      "webhookId": "80f071d7-62c5-450c-9369-9571580abf16"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "JayAgenda",
+        "remoteJid": "558586275965@s.whatsapp.net",
+        "messageText": "={{ $('Split Out').item.json.Texto }}",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        2540,
+        460
+      ],
+      "id": "ad96def0-bf5b-4c99-b133-8e2b99c47c65",
+      "name": "Evento Lissiane",
+      "credentials": {
+        "evolutionApi": {
+          "id": "As6WaSWeGyu8Ew8X",
+          "name": "Evolution account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "JayAgenda",
+        "remoteJid": "558588339667@s.whatsapp.net",
+        "messageText": "=🤖👍 *FIM DA AGENDA COTECI*",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        2100,
+        220
+      ],
+      "id": "27c3dd41-f6cd-4ce7-8732-425e187799ad",
+      "name": "Fim Agenda Jayckson",
+      "executeOnce": true,
+      "credentials": {
+        "evolutionApi": {
+          "id": "As6WaSWeGyu8Ew8X",
+          "name": "Evolution account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1880,
+        220
+      ],
+      "id": "d8b55c04-d2a5-4463-b66d-8daeef544c5f",
+      "name": "Wait3",
+      "webhookId": "2ae122ba-8647-4d49-9b6f-055a62dfdf06"
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "JayAgenda",
+        "remoteJid": "558597593445@s.whatsapp.net",
+        "messageText": "=🤖👍 *FIM DA AGENDA COTECI*",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        220
+      ],
+      "id": "e2960c89-d453-47c5-b5aa-11be011969b7",
+      "name": "Fim Agenda Bruno",
+      "executeOnce": true,
+      "credentials": {
+        "evolutionApi": {
+          "id": "As6WaSWeGyu8Ew8X",
+          "name": "Evolution account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "amount": 2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2320,
+        220
+      ],
+      "id": "b22fffeb-6528-4f11-a947-726b1c20db90",
+      "name": "Wait4",
+      "webhookId": "eef5fc53-d581-41cb-ad5a-42d2346be10c",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "resource": "messages-api",
+        "instanceName": "JayAgenda",
+        "remoteJid": "558586275965@s.whatsapp.net",
+        "messageText": "=🤖👍 *FIM DA AGENDA COTECI*",
+        "options_message": {}
+      },
+      "type": "n8n-nodes-evolution-api.evolutionApi",
+      "typeVersion": 1,
+      "position": [
+        2540,
+        220
+      ],
+      "id": "290baf45-df5f-402c-8720-76ecb22e90e8",
+      "name": "Fim Agenda Lissiane",
+      "executeOnce": false,
+      "credentials": {
+        "evolutionApi": {
+          "id": "As6WaSWeGyu8Ew8X",
+          "name": "Evolution account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "start.dateTime"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        300,
+        240
+      ],
+      "id": "940902e9-5b33-4630-bf45-1d163f2876c5",
+      "name": "Sort"
+    },
+    {
+      "parameters": {
+        "longUrl": "={{ $('Sort').item.json.htmlLink }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.bitly",
+      "typeVersion": 1,
+      "position": [
+        760,
+        240
+      ],
+      "id": "1596b0ac-1a07-474b-9237-a73433344e61",
+      "name": "Bitly",
+      "credentials": {
+        "bitlyApi": {
+          "id": "3Bz5nUnExhyPWeNr",
+          "name": "Bitly Encurtador"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1220,
+        480
+      ],
+      "id": "fa7bb10c-7b2a-465c-b3b1-c7520083b139",
+      "name": "Loop"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        [
+          {
+            "node": "Agenda COTECI",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Agenda Entrevistas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agenda COTECI": {
+      "main": [
+        [
+          {
+            "node": "Enviar Jayckson",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Jayckson": {
+      "main": [
+        [
+          {
+            "node": "Pause",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pause": {
+      "main": [
+        [
+          {
+            "node": "Enviar Bruno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Bruno": {
+      "main": [
+        [
+          {
+            "node": "Pause1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pause1": {
+      "main": [
+        [
+          {
+            "node": "Enviar Lissiane",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Sort",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Sem Agenda Bruno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pause2": {
+      "main": [
+        [
+          {
+            "node": "Sem Agenda Jayckson",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sem Agenda Jayckson": {
+      "main": [
+        [
+          {
+            "node": "Pause3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pause3": {
+      "main": [
+        [
+          {
+            "node": "Sem Agenda Lissiane",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gatilho 8h": {
+      "main": [
+        [
+          {
+            "node": "Dia de hoje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agenda COTECI Listar": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Início": {
+      "main": [
+        [
+          {
+            "node": "Hora Início",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hora Início": {
+      "main": [
+        [
+          {
+            "node": "Bitly",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Campos": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pause4": {
+      "main": [
+        [
+          {
+            "node": "Abertura Agenda Jayckson",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Abertura Agenda Bruno": {
+      "main": [
+        [
+          {
+            "node": "Pause4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pause5": {
+      "main": [
+        [
+          {
+            "node": "Abertura Agenda Lissiane",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Abertura Agenda Lissiane": {
+      "main": [
+        [
+          {
+            "node": "Agenda COTECI Listar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sem Agenda Bruno": {
+      "main": [
+        [
+          {
+            "node": "Pause2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evento Jayckson": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Abertura Agenda Jayckson": {
+      "main": [
+        [
+          {
+            "node": "Pause5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Dia de hoje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dia de hoje": {
+      "main": [
+        [
+          {
+            "node": "Abertura Agenda Bruno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Evento Jayckson",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evento Bruno": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Evento Lissiane",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evento Lissiane": {
+      "main": [
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fim Agenda Jayckson": {
+      "main": [
+        [
+          {
+            "node": "Wait4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait3": {
+      "main": [
+        [
+          {
+            "node": "Fim Agenda Jayckson",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fim Agenda Bruno": {
+      "main": [
+        [
+          {
+            "node": "Wait3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait4": {
+      "main": [
+        [
+          {
+            "node": "Fim Agenda Lissiane",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort": {
+      "main": [
+        [
+          {
+            "node": "Data Início",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bitly": {
+      "main": [
+        [
+          {
+            "node": "Campos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop": {
+      "main": [
+        [
+          {
+            "node": "Fim Agenda Bruno",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Evento Bruno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Sao_Paulo",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "cb228189-4e3c-43f1-9cf4-f32da0fd79ef",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3985395e5bb8b324eee0445f023354c67e7d2b83c5fd763765d714c21293f7a2"
+  },
+  "id": "ARXE9NEyOiOiezlU",
+  "tags": []
+}
